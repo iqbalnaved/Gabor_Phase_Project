@@ -1,18 +1,18 @@
-Different Gabor filter Performance Test for Face Recognition , version 2012
+#Different Gabor filter Performance Test for Face Recognition , version 2012
 ===========================================================================
 
 MATLAB Version used: R2009b, R2010a
 
-Face Databases used
+##Face Databases used
 ===================
 
 FERET - 100 and 1000 subjects [fa and fb set]
 Indian - 40 subjects
 In-house - 60 subjects
 
-Folder structure:
+##Folder structure:
 =================
-Gabor_Project_v5
+`Gabor_Project_v5
    |
    --- db [Stores face data]
    |   |
@@ -22,20 +22,20 @@ Gabor_Project_v5
    --- filters [Created Gabor filters are stored here]
    --- lib [Code goes here]
    --- results [Stores matching score in .txt here in corresponding test folder]
-   --- tests [Codes created for specific tests goes here]
+   --- tests [Codes created for specific tests goes here]`
 
-Process flow
+##Process flow
 ============
-Step 1: Create filters and save in 'filters' folder
-Step 2: Convolve gallery/probe images using appropriate Gabor filter of choice
-Step 3: Create lgbp of gallery/probe images from the convolved images 
-Step 5: Create local histogram sequence of lgbp images and store them in 'lh' folder as (gallery and probe as .mat)
-Step 4: Perform appropriate distance measure (histogram intersection/euclidean/cityblock) between face images, highest score is the matched image
-Step 5: Store result in 'results' folder
+* Step 1: Create filters and save in 'filters' folder
+* Step 2: Convolve gallery/probe images using appropriate Gabor filter of choice
+* Step 3: Create lgbp of gallery/probe images from the convolved images 
+* Step 5: Create local histogram sequence of lgbp images and store them in 'lh' folder as (gallery and probe as .mat)
+* Step 6: Perform appropriate distance measure (histogram intersection/euclidean/cityblock) between face images, highest score is the matched image
+* Step 7: Store result in 'results' folder
 
-Library functions:
+##Library functions:
 =================
-
+`
 Name of Function		Description
 ================		===========
 LogGaborWavelet			The log-Gabor wavelet function
@@ -61,5 +61,6 @@ efficientLGBP			Encode convolved image to LGBP
 efficientLH				Create local histogram sequence from encoded LGBP
 direct_matching			Generates face match score using histogram intersection/eulidean/city-block distance
 weighted_matching		Generates weighted face match score using histogram intersection/eulidean/city-block distance
+`
 
 
