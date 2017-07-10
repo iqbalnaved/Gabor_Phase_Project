@@ -10,17 +10,8 @@ MATLAB Version used: R2009b, R2010a
 
 ## Folder structure:
 
->Gabor_Project_v5
-   |
-   --- db [Stores face data]
-   |   |
-   |   --- gallery set 
-   |   --- probe set
-   --- lh [Stores local histograms, gallery set and probe set as .mat files]
-   --- filters [Created Gabor filters are stored here]
-   --- lib [Code goes here]
-   --- results [Stores matching score in .txt here in corresponding test folder]
-   --- tests [Codes created for specific tests goes here]
+![Folder structure](https://raw.githubusercontent.com/iqbalnaved/Gabor_Phase_Project/master/gabor_phase_project.png)
+
 
 ## Process flow
 
