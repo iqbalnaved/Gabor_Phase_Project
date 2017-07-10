@@ -69,7 +69,6 @@ and Amin, M. Ashraful
 and Yan, Hong},
   Journal                  = {International Journal of Machine Learning and Cybernetics},
   Year                     = {2016},
-
   Month                    = {Dec},
   Number                   = {6},
   Pages                    = {1115--1130},
