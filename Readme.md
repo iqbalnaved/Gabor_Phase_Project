@@ -12,7 +12,7 @@ In-house - 60 subjects
 
 ## Folder structure:
 =================
-`Gabor_Project_v5
+>Gabor_Project_v5
    |
    --- db [Stores face data]
    |   |
@@ -22,7 +22,7 @@ In-house - 60 subjects
    --- filters [Created Gabor filters are stored here]
    --- lib [Code goes here]
    --- results [Stores matching score in .txt here in corresponding test folder]
-   --- tests [Codes created for specific tests goes here]`
+   --- tests [Codes created for specific tests goes here]
 
 ## Process flow
 ============
@@ -35,7 +35,7 @@ In-house - 60 subjects
 
 ## Library functions:
 =================
-`
+
 Name of Function |		Description
 ---------------- |		-----------
 LogGaborWavelet  |			The log-Gabor wavelet function
@@ -61,6 +61,6 @@ efficientLGBP|			Encode convolved image to LGBP
 efficientLH|				Create local histogram sequence from encoded LGBP
 direct_matching|			Generates face match score using histogram intersection/eulidean/city-block distance
 weighted_matching|		Generates weighted face match score using histogram intersection/eulidean/city-block distance
-`
+
 
 
