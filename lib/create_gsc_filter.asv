@@ -1,0 +1,23 @@
+% Orient = {1,..,} summed, Scale concatenated
+function create_gsc_filter(R, C)
+
+nscale = 5; norient = 8;
+
+Kmax = pi / 2;
+f = sqrt( 2 );
+Delt = 2 * pi;
+Delt2 = Delt * Delt;
+
+filter = zeros(R,C, nscale);
+
+x = 1;
+for v = 0:4
+    for u = 1:8
+        filter(:,:,x) = filter(:,:,x) + GaborWavelet( R, C, Kmax, f, u, v, Delt2 ); % Create the Gabor filter
+    end
+    x = x + 1;    
+end
+
+filter = filter ./ norient;
+
+save('..\filters\gsc_filter', 'filter');

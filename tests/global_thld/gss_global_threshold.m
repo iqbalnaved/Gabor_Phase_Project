@@ -1,0 +1,78 @@
+% for each threshold from 0 to 16384 incremented by 128 we do the following - 
+% for all 200 images, if the similarity measure is above the current threshold for a query image
+% for a certain target image then,
+%     if the id of the target images equals to query id then it is correct acceptance,
+%                     TP = TP + 1;
+%     else it is incorrect acceptance,
+%                     FP = FP + 1;
+% If no images found in target set that has similarity measure above or equal to
+% current threshold then,
+%     if the probe image is from positive sample i.e. from 101-200 then incorrect rejection,
+%                     FN = FN + 1;
+%     else if the probe image is from negative sample i.e. from 201-302
+%     then correct rejection,
+%                     TN = TN + 1;
+% 4. Plot the TP,FN in a graph and TN,FP in another graph. The x-axis is the threshold
+% from 0 to 1 and y-axis is the number of subjects.
+%%
+addpath('E:\Face Recognition\Gabor_Project_v5\lib');
+clear;clc;
+
+method = 'pha'; % mag, pha
+filter = create_gss_filter(128,128);
+probe_path = 'E:\Face Recognition\Gabor_Project_v4\db\fb_csu_200\';
+probefiles = dir(probe_path);
+LH_probe = zeros(256,64,length(probefiles)-2);
+for i = 3:length(probefiles)
+    im = imread([probe_path probefiles(i).name]);
+    gim = gss_convolve(im, 'pha', filter);
+    lgbp = efficientLGBP(gim);
+    LH_probe(:,:,i-2) = efficientLH(lgbp,64,256);
+end
+fprintf('encoded probe files\r');
+
+gallery_path = 'E:\Face Recognition\Gabor_Project_v4\db\fafb_csu_200\';
+galleryfiles = dir(gallery_path);
+gallery_size = 100; % subset of the fafb_csu_200
+LH_gallery = zeros(256,64,gallery_size);
+for i = 3:gallery_size+2
+    im = imread([gallery_path galleryfiles(i).name]);
+    gim = gss_convolve(im, 'pha', filter);
+    lgbp = efficientLGBP(gim);
+    LH_gallery(:,:,i-2) = efficientLH(lgbp,64,256);
+end
+fprintf('encoded gallery files\r');
+
+threshold = 0:128:16384;
+tp = zeros(length(threshold),1); fn = zeros(length(threshold),1); 
+tn = zeros(length(threshold),1); fp = zeros(length(threshold),1);
+x = 1;
+for x = 1:length(threshold)
+    for i = 1:size(LH_probe,3) % probe is containing 100 positive + 100 negative samples
+        found = 0;
+        for j = 1:gallery_size % gallery is containing 100 positive samples
+            sm = direct_matching(LH_gallery(:,:,j), LH_probe(:,:,i), 'hi');            
+            if(sm >= threshold(x)) 
+                found = 1;
+                if(str2double(probefiles(i+2).name(1:5)) <= 100) % if probe id is from positive sample, then correct acceptance
+                    tp(x) = tp(x) + 1;
+                    break;
+                else
+                    fp(x) = fp(x) + 1;
+                    break;
+                end
+            end
+        end
+        if(found == 0) % rejected probe id
+            if(str2double(probefiles(i+2).name(1:5)) <= 100) % if probe id from positive sample then incorrect rejection
+               fn(x) = fn(x) + 1; 
+            else % if probe id from negative sample then correct rejection
+               tn(x) = tn(x) + 1;
+            end
+        end        
+%         fprintf('probe=%d\r', double(probefiles(i+2).name(1:5)));
+    end
+    fprintf('processed thld=%d tp=%d fn=%d tn=%d fp=%d\r', threshold(x), tp(x),fn(x),tn(x),fp(x));
+end
+result = [threshold' tp fn tn fp];  
+

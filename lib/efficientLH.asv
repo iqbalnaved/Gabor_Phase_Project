@@ -1,0 +1,69 @@
+% This function takes the LGBP_Pha or LGBP_Mag images, the number of
+% regions each images to be divided into, and the number of bins (gray
+% levels) for the grayscale images. Then it divides the LGBP image into the
+% n regions and takes local histograms of each of the region and stores in
+% a cell-array.
+function LH = efficientLH(lgbp, nregion, nbin) %LGBP_Mag or LGBP_Pha
+
+    lgbp = double(lgbp);
+
+    if (length(size(lgbp)) == 3)
+        [rows cols height] = size(lgbp);
+
+        rsize = ( rows * cols ) / nregion;   % number of pixels per region (128*128)/64=256
+        factors = factor(rsize);             % returns all the prime factors of rsize in an array
+        rrows = prod(factors(1:floor(length(factors)/2))); % number of rows in a region, taking the product of half the factors = 16
+        rcols = rsize/rrows;                % number of columns in a region, taking the rest of the factors, 256/16=16
+        rgnNumRows = rows/rrows;
+        rgnNumCols = cols/rcols;
+
+        LH = zeros(nbin, nregion, height,'uint8');
+        
+        J = zeros(nbin*(rgnNumRows), (rgnNumCols), height, 'uint8');
+        for h = 1:height
+            J(:,:,h) = blkproc(lgbp(:,:,h),[rrows rcols],@(x)lh(x, rrows, rcols, nbin));
+        end
+        p = 1; q = rgnNumCols;
+        x = 1; y = nbin;
+        for i = 1:rgnNumCols
+            LH(:,p:q, :) = J(x:y, 1:rgnNumCols, :);
+
+            x = y + 1;
+            y = y + nbin;
+
+            p = q + 1;
+            q = q + rgnNumCols;
+        end
+    else
+        [rows cols] = size(lgbp);
+
+        rsize = ( rows * cols ) / nregion;   % number of pixels per region (128*128)/64=256
+        factors = factor(rsize);             % returns all the prime factors of rsize in an array
+        rrows = prod(factors(1:floor(length(factors)/2))); % number of rows in a region, taking the product of half the factors = 16
+        rcols = rsize/rrows;                % number of columns in a region, taking the rest of the factors, 256/16=16
+        rgnNumRows = rows/rrows;
+        rgnNumCols = cols/rcols;
+
+        J = blkproc(lgbp,[rrows rcols],@(x)lh(x, rrows, rcols, nbin));
+
+        LH = zeros(nbin,nregion, 'uint8');
+
+        p = 1; q = 8;
+        x = 1; y = nbin;
+        for i = 1:8
+            LH(:,p:q) = J(x:y, 1:8);
+
+            x = y + 1;
+            y = y + nbin;
+
+            p = q + 1;
+            q = q + 8;
+        end
+    end
+    
+    function y = lh(x, r, c, b)
+        x = reshape(x,1,r*c);
+        y = histc(x,0:b-1)';
+    end    
+end
+

@@ -1,0 +1,125 @@
+clear;clc;
+addpath('E:\Face Recognition\Gabor_Project_v5\lib\');
+
+nregion = 64; nbin = 256;
+
+gabor_type = 'gcv'; % gcv, gsv, gmuc, gmus
+method = 'pha'; % mag, pha
+
+% ProbeSets = {'fb', 'fc', 'dup1', 'dup2'};
+ProbeSets = {'fb_csu'};
+% ProbeSets = {'combined_probe'};
+
+for p = 1:length(ProbeSets)
+    probe_set = ProbeSets{p};  
+
+    if strcmp(probe_set, 'dup2') || strcmp(probe_set, 'fadup2')
+        test_size = 75;
+        probe_size = 75;
+    else
+        test_size = 200;
+        probe_size = 200;
+    end    
+    
+%     SimTypes  = {'hi', 'euclidean', 'cityblock', 'cosine', 'jaccard', 'mahal', 'hamming'};
+SimTypes  = {'hi'};
+    
+%     for s = 1:length(SimTypes)-3 %skipping last three
+    for s = 1:length(SimTypes) %skipping last three
+
+        sm_type = SimTypes{s};  
+
+        if strcmp(gabor_type, 'gcv') || strcmp(gabor_type, 'gsv')
+            kval = 4;
+            part_type = 'scale';
+        elseif strcmp(gabor_type, 'gmuc') || strcmp(gabor_type, 'gmus')
+            kval = 7;
+            part_type = 'orient';
+        end
+
+        fid = fopen(['..\..\results\' gabor_type '\' gabor_type '_' method '_' probe_set '_' sm_type '_' num2str(test_size) '.txt'], 'a');
+        
+%         if strcmp(probe_set, 'fc') && strcmp(sm_type, 'cityblock')
+%             start = 4;
+%         else
+%             start = 1;
+%         end
+
+%         for k = start:kval
+        for k = 0:kval
+
+            load(['..\..\lh\' gabor_type '\' gabor_type '_' method '_fa' probe_set '_' num2str(test_size) '_' part_type '_' num2str(k)]);
+            LH_Gallery_list = LH_list; clear LH_list;
+
+            load(['..\..\lh\' gabor_type '\' gabor_type '_' method '_' probe_set '_' num2str(test_size) '_' part_type '_' num2str(k)]);
+            LH_Probe_list = LH_list; clear LH_list;
+                
+            if strcmp(gabor_type, 'gcv') || strcmp(gabor_type, 'gmuc')
+                SM = zeros(size(LH_Gallery_list,4), size(LH_Probe_list,4));
+
+                for i = 1:size(LH_Gallery_list,4)
+                    tic
+                    for j = 1:size(LH_Probe_list,4)
+                        SM(i,j) = direct_matching(LH_Gallery_list(:,:,:,i), LH_Probe_list(:,:,:,j), sm_type);        
+                    end
+                    toc
+                    fprintf('processed probes against %d ', i);
+                end
+            elseif strcmp(gabor_type, 'gsv') || strcmp(gabor_type, 'gmus')
+                SM = zeros(size(LH_Gallery_list,3), size(LH_Probe_list,3));
+
+                for i = 1:size(LH_Gallery_list,3)
+                    tic
+                    for j = 1:size(LH_Probe_list,3)
+                        SM(i,j) = direct_matching(LH_Gallery_list(:,:,i), LH_Probe_list(:,:,j), sm_type);        
+                    end
+                    toc
+                    fprintf('processed probes against %d ', i);
+                end    
+            end
+
+%             load(['..\..\sim_matrix\' gabor_type '\' gabor_type '_' method '_' probe_set '_' sm_type '_' num2str(test_size) '_' part_type '_' num2str(k) ]);
+
+            if strcmp(sm_type, 'hi') || strcmp(sm_type, 'cosine') || strcmp(sm_type, 'jaccard')
+                [max_sim max_gallery_index] = max(SM);
+            else
+                [max_sim max_gallery_index] = min(SM);
+            end
+
+            gallery_path = ['E:\Face Recognition\Gabor_Project_v4\db\fa' probe_set '_' num2str(test_size) '\'];            
+            probe_path = ['E:\Face Recognition\Gabor_Project_v4\db\' probe_set '_'  num2str(test_size) '\'];
+
+            gallery_file_list = dir(gallery_path);
+            probe_file_list = dir(probe_path);
+
+            x = 1; match = {};
+            for i = 1:length(max_gallery_index)
+                gallery_id = gallery_file_list(max_gallery_index(i)+2).name(1:5);
+                probe_id = probe_file_list(i+2).name(1:5);
+                if strcmp(gallery_id, probe_id) == 1
+                    match{x,1} = gallery_id;
+                    match{x,2} = probe_id;
+                    match{x,3} = max_sim(i);
+                    x = x + 1;
+                end
+            end
+
+            if exist('match', 'var')
+                match_count = size(match,1);
+            else
+                match_count = 0;
+            end
+
+            fprintf('\r%d out of %d matched', match_count, probe_size);
+            fprintf('\r%s %s %s %s recognition acc: %f%%', gabor_type, method, probe_set, sm_type, (match_count / probe_size) * 100);
+
+            fprintf(fid, '\r%d out of %d matched', match_count, probe_size);
+            fprintf(fid, '\r%s %s %s %s %s=%d recognition acc: %f%%\r\r', gabor_type, method, probe_set, sm_type, part_type, k, (match_count / probe_size) * 100);
+
+%             save(['..\..\sim_matrix\' gabor_type '\' gabor_type '_' method '_' probe_set '_' sm_type '_' num2str(test_size) '_' part_type '_' num2str(k) ], 'SM');
+        end
+        fclose(fid);        
+    end
+end
+
+msgbox('finished');

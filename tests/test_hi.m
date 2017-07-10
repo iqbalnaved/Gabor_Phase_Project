@@ -1,0 +1,74 @@
+cd 'E:\Face Recognition\Gabor_Project_v4';
+clear;clc;
+addpath('E:\Face Recognition\Gabor_Project_v4\lib\');
+
+nregion = 64; nbin = 256;
+% R = 128;
+% C = 128;
+% create_gcc_filter(R,C);
+% create_gss_filter(R,C);
+load('filters\gcc_filter');
+% load('filters\gss_filter');
+
+method = 'mag';
+
+probe_size = 10;
+% gallery_path = 'E:\Face Recognition\Gray_FERET_1996_Set\Gray_FERET_1996_Set_Normalized\fa_normalized\';
+% probe_path = 'E:\Face Recognition\Gray_FERET_1996_Set\Gray_FERET_1996_Set_Normalized\fc_normalized\';
+
+% fafc subset
+gallery_path = 'E:\Face Recognition\Gabor_Phase_Project_v3\db\fafc_10\';
+probe_path = 'E:\Face Recognition\Gabor_Phase_Project_v3\db\fc_10\';
+
+% fafb subset
+% gallery_path = 'E:\Face Recognition\Gabor_Phase_Project_v2\db\gallery10\';
+% probe_path = 'E:\Face Recognition\Gabor_Phase_Project_v2\db\probes10\';
+
+gallery_file_list = dir(gallery_path);
+probe_file_list = dir(probe_path);
+
+SM = zeros(length(gallery_file_list)-2, length(probe_file_list)-2);
+
+for i = 3:length(gallery_file_list)
+    im = imread([gallery_path gallery_file_list(i).name]);    
+    gim = gcc_convolve(im, method, filter);
+%     gim = gss_convolve(im, method, filter);
+    lgbp = efficientLGBP(gim);
+    LH_g = efficientLH(lgbp, nregion, nbin);
+    tic
+    for j = 3:length(probe_file_list)
+        im = imread([probe_path probe_file_list(j).name]);    
+        gim = gcc_convolve(im, method, filter);
+%         gim = gss_convolve(im, method, filter);
+        lgbp = efficientLGBP(gim);
+        LH_p = efficientLH(lgbp, nregion, nbin);
+        SM(i-2,j-2) = histogram_intersection(LH_g, LH_p);        
+    end
+    toc
+    fprintf('processed probes against %s', gallery_file_list(i).name);
+end
+
+[max_sim max_gallery_index] = max(SM);
+
+x = 1; match = {};
+for i = 1:length(max_gallery_index)
+    gallery_id = gallery_file_list(max_gallery_index(i)+2).name(1:5);
+    probe_id = probe_file_list(i+2).name(1:5);
+    if strcmp(gallery_id, probe_id) == 1
+        match{x,1} = gallery_id;
+        match{x,2} = probe_id;
+        match{x,3} = max_sim(i);
+        x = x + 1;
+    end
+end
+
+if exist('match', 'var')
+    match_count = size(match,1);
+else
+    match_count = 0;
+end
+
+
+fprintf('\r%d out of %d matched', match_count, probe_size);
+fprintf('\rrecognition acc: %f%%', (match_count / probe_size) * 100);
+

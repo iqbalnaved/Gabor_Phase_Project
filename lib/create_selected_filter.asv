@@ -1,0 +1,23 @@
+function create_selected_filter(R, C)
+
+nscale = 5; norient = 8;
+
+Kmax = pi / 2;
+f = sqrt( 2 );
+Delt = 2 * pi;
+Delt2 = Delt * Delt;
+
+filter = zeros(R,C, nscale*norient);
+
+% filters having rank-1 in normalized, sorted, 40 filter accuracy list for 4 probe sets.
+% orientation scale
+selected_filters = [0 3; 1 3; 2 3; 4 3; 5 3; 6 3; 7 3; 0 4; 1 4; 4 4; 5 4; 7 4];
+x = 1;
+for i = length(selected_filters)
+    u = selected_filters(i,1);    
+    v = selected_filters(i,2);
+    filter(:,:,x) = GaborWavelet( R, C, Kmax, f, u, v, Delt2 ); % Create the Gabor filter
+    x = x + 1;
+end
+
+save('filters\selected_filter', 'filter');

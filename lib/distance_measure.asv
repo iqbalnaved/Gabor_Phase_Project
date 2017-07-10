@@ -1,0 +1,27 @@
+% If similarity_measure is 'euclidean'/'cityblock'/'cosine' distance, it
+% finds the distance measures between corresponding pixels of the two gabor images 
+% then returns the sum of the distances.
+
+function dist = distance_measure(GaborImg1, GaborImg2, dist_type)
+
+    if length(size(GaborImg1)) == 3 % size(GaborImg) = 128x128x40/8/5        
+        if strcmp(dist_type, 'euclidean') == 1
+            dist = sum(sum(sum((GaborImg1-GaborImg2).^2)))^0.5; % 256x64-256x64, this is done for all 40/8/5 dim               
+        elseif strcmp(dist_type, 'cityblock') == 1
+            dist = sum(sum(sum(abs(GaborImg1-GaborImg2))));
+        elseif strcmp(dist_type, 'cosine') == 1
+            numer = sum(M1 .* M2, 3);      %32x32
+            denom = sqrt(sum(M1.^2, 3)) + sqrt(sum(M2.^2, 3)); %32x32
+
+            sim = sum(sum(numer ./ denom));            
+        end
+    else
+        % size(GaborImg) = 128x128
+        if strcmp(dist_type, 'euclidean') == 1
+            dist = sum(sum((GaborImg1-GaborImg2).^2))^0.5;
+        elseif strcmp(dist_type, 'cityblock') == 1
+            dist = sum(sum(abs(GaborImg1-GaborImg2))); 
+        end
+    end
+
+end

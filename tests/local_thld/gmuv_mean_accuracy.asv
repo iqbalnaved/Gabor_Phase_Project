@@ -1,0 +1,7 @@
+load('gmuv_local_thld_test_60.mat');
+
+
+for f = 1:40
+    res=cell2mat(result(:,6,f));
+    
+    

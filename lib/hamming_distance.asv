@@ -1,0 +1,35 @@
+% local matching, sum of all distance measures of individual regions.
+function dist = hamming_distance(lgbp1, lgbp2, nregion)
+
+    if length(size(lgbp1)) == 3
+        lgbp1 = reshape(lgbp1, 1, size(lgbp1, 1)*size(lgbp1, 2)*size(lgbp1,3));
+        lgbp2 = reshape(lgbp2, 1, size(lgbp2, 1)*size(lgbp2, 2)*size(lgbp2,3));
+    else
+        lgbp1 = reshape(lgbp1, 1, size(lgbp1, 1)*size(lgbp1, 2));
+        lgbp2 = reshape(lgbp2, 1, size(lgbp2, 1)*size(lgbp2, 2));        
+    end
+    
+    
+   C = bitxor(lgbp1, lgbp2); % 1 for each 1,0 or 0,1 pair
+   
+   dist = sum(sum(dec2bin(C)-'0')); % count the number of 1s
+
+end
+
+
+% holistic distance measure, considering whole image as a vector
+% function dist = hamming_distance(lgbp1, lgbp2)
+% 
+%     if length(size(lgbp1)) == 3
+%         lgbp1 = reshape(lgbp1, 1, size(lgbp1, 1)*size(lgbp1, 2)*size(lgbp1,3));
+%         lgbp2 = reshape(lgbp2, 1, size(lgbp2, 1)*size(lgbp2, 2)*size(lgbp2,3));
+%     else
+%         lgbp1 = reshape(lgbp1, 1, size(lgbp1, 1)*size(lgbp1, 2));
+%         lgbp2 = reshape(lgbp2, 1, size(lgbp2, 1)*size(lgbp2, 2));        
+%     end
+%     
+%    C = bitxor(lgbp1, lgbp2); % 1 for each 1,0 or 0,1 pair
+%    
+%    dist = sum(sum(dec2bin(C)-'0')); % count the number of 1s
+% 
+% end

@@ -1,0 +1,31 @@
+function create_gcc_filters()
+
+R = size(I,1);
+C = size(I,2);
+
+nscale = 5; norient = 8;
+
+Kmax = pi / 2;
+f = sqrt( 2 );
+Delt = 2 * pi;
+Delt2 = Delt * Delt;
+
+imfft = fft2(I);
+
+EO = zeros(R,C,nscale*norient);
+
+x = 1;
+for v = 0:4
+    for u = 1:8
+        filter = GaborWavelet ( R, C, Kmax, f, u, v, Delt2 ); % Create the Gabor filter
+        temp = imfft .* filter; % convolve
+        EO(:,:,x) = ifft2(temp);
+        x = x + 1;
+    end
+end
+
+if strcmp(method, 'mag')
+    EO_Part = abs(EO);
+elseif strcmp(method, 'pha')
+    EO_Part = angle(EO);
+end
